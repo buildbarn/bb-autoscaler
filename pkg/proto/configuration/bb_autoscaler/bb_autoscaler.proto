@@ -1,0 +1,63 @@
+syntax = "proto3";
+
+package buildbarn.configuration.bb_autoscaler;
+
+import "build/bazel/remote/execution/v2/remote_execution.proto";
+
+option go_package = "github.com/buildbarn/bb-autoscaler/pkg/proto/configuration/bb_autoscaler";
+
+message ApplicationConfiguration {
+  // The URL of the Prometheus server from which to fetch metrics.
+  //
+  // Example: http://prometheus.kube-system.svc.cluster.local:9090/
+  string prometheus_endpoint = 1;
+
+  // The PromQL query that should be sent to the Prometheus server to
+  // obtain the desired number of workers for a bb-scheduler platform
+  // queue. This PromQL may yield multiple rows. Each row should must
+  // have an "instance_name" and "platform" label.
+  //
+  // Below is an example query that may be used, causing the desired
+  // number of workers to be equal to the 95th percentile of load within
+  // the last four hours. It is recommended that this query is placed in
+  // a recording rule on the Prometheus server, so that it can be
+  // extracted efficiently.
+  //
+  // quantile_over_time(
+  //   0.95,
+  //   (
+  //       sum(buildbarn_builder_in_memory_build_queue_operations_queued_total)
+  //       by (instance_name, platform)
+  //     -
+  //       sum(buildbarn_builder_in_memory_build_queue_operations_executing_duration_seconds_count)
+  //       by (instance_name, platform)
+  //   )[4h:]
+  // )
+  string prometheus_query = 2;
+
+  // Auto Scaling Groups whose desired capacity should be adjusted.
+  repeated NodeGroupConfiguration node_groups = 3;
+}
+
+message NodeGroupConfiguration {
+  // The "instance_name" label that should be used to look up the
+  // desired number of workers in the Prometheus query results.
+  string instance_name = 1;
+
+  // The "platform" label that should be used to look up the desired
+  // number of workers in the Prometheus query results.
+  build.bazel.remote.execution.v2.Platform platform = 2;
+
+  // The name of the AWS EC2 Auto Scaling Group (ASG) whose desired
+  // capacity should be adjusted.
+  string auto_scaling_group_name = 3;
+
+  // The number of workers that constitute to a single unit of capacity.
+  // In the general case, it should correspond to the bb-worker
+  // concurrency of a single EC2 instance.
+  //
+  // When Mixed Instance Policies are used, it is advised that this
+  // field is set to 1, and that the WeightedCapacity of every EC2
+  // instance type is set to its actual concurrency.
+  int64 workers_per_capacity_unit = 4;
+}
