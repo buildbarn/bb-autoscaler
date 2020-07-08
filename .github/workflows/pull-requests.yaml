@@ -25,8 +25,8 @@ jobs:
     - name: Check for ineffective assignments
       run: bazel run @com_github_gordonklaus_ineffassign//:ineffassign $(pwd)
 
-    - name: Linux build and test
-      run: bazel test --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //...
+    - name: Linux build
+      run: bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //...
     - name: macOS build
       run: bazel build --platforms=@io_bazel_rules_go//go/toolchain:darwin_amd64 //...
     - name: FreeBSD build
