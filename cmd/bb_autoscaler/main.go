@@ -7,10 +7,10 @@ import (
 	"os"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	remoteexecution "github.com/bazelbuild/remote-apis/build/bazel/remote/execution/v2"
 	"github.com/buildbarn/bb-autoscaler/pkg/proto/configuration/bb_autoscaler"
+	"github.com/buildbarn/bb-storage/pkg/cloud/aws"
 	"github.com/buildbarn/bb-storage/pkg/util"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
@@ -86,7 +86,11 @@ func main() {
 	}
 
 	log.Print("[2/2] Adjusting desired capacity of ASGs")
-	autoScaling := autoscaling.New(session.New())
+	sess, err := aws.NewSessionFromConfiguration(configuration.AwsSession)
+	if err != nil {
+		log.Fatal("Failed to create AWS session: ", err)
+	}
+	autoScaling := autoscaling.New(sess)
 	for _, nodeGroup := range configuration.NodeGroups {
 		var marshaler jsonpb.Marshaler
 		platformStr, _ := marshaler.MarshalToString(nodeGroup.Platform)

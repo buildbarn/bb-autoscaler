@@ -9,9 +9,9 @@ go_library(
     visibility = ["//visibility:private"],
     deps = [
         "//pkg/proto/configuration/bb_autoscaler:go_default_library",
-        "@com_github_aws_aws_sdk_go//aws/session:go_default_library",
         "@com_github_aws_aws_sdk_go//service/autoscaling:go_default_library",
         "@com_github_bazelbuild_remote_apis//build/bazel/remote/execution/v2:go_default_library",
+        "@com_github_buildbarn_bb_storage//pkg/cloud/aws:go_default_library",
         "@com_github_buildbarn_bb_storage//pkg/util:go_default_library",
         "@com_github_golang_protobuf//jsonpb:go_default_library_gen",
         "@com_github_golang_protobuf//proto:go_default_library",

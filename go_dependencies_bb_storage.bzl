@@ -16,9 +16,9 @@ def bb_storage_go_dependencies():
             "@com_github_buildbarn_bb_storage//:patches/com_github_bazelbuild_remote_apis/auxiliary_metadata.diff",
             "@com_github_buildbarn_bb_storage//:patches/com_github_bazelbuild_remote_apis/golang.diff",
         ],
-        sha256 = "79204ed1fa385c03b5235f65b25ced6ac51cf4b00e45e1157beca6a28bdb8043",
-        strip_prefix = "remote-apis-2.0.0",
-        urls = ["https://github.com/bazelbuild/remote-apis/archive/v2.0.0.tar.gz"],
+        sha256 = "6fee1d4d911324cd0a95aa19411867a17bb8c34a9a90667c21c825b122b0d79a",
+        strip_prefix = "remote-apis-7802003e00901b4e740fe0ebec1243c221e02ae2",
+        urls = ["https://github.com/bazelbuild/remote-apis/archive/7802003e00901b4e740fe0ebec1243c221e02ae2.tar.gz"],
     )
 
     go_repository(
@@ -36,9 +36,10 @@ def bb_storage_go_dependencies():
     go_repository(
         name = "com_github_golang_mock",
         importpath = "github.com/golang/mock",
-        sha256 = "0dc7dbcf6d83b4318e26d9481dfa9405042288d666835f810e0b70ada2f54e11",
-        strip_prefix = "mock-aedf487a10d1285646a046e4c9537d7854e820e1",
-        urls = ["https://github.com/EdSchouten/mock/archive/aedf487a10d1285646a046e4c9537d7854e820e1.tar.gz"],
+        patches = ["@com_github_buildbarn_bb_storage//:patches/com_github_golang_mock/mocks-for-funcs.diff"],
+        sha256 = "d6a80e2ba2d23b5cbcce09eaff6d8a961262f12b95ae18011ee9ad4ddd339f76",
+        strip_prefix = "mock-6d816de489c18a7e9a8fbd2aa5bb2dd75f2bbc86",
+        urls = ["https://github.com/golang/mock/archive/6d816de489c18a7e9a8fbd2aa5bb2dd75f2bbc86.tar.gz"],
     )
 
     go_repository(

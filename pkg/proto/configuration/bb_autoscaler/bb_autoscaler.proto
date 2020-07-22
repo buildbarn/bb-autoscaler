@@ -3,6 +3,7 @@ syntax = "proto3";
 package buildbarn.configuration.bb_autoscaler;
 
 import "build/bazel/remote/execution/v2/remote_execution.proto";
+import "pkg/proto/configuration/cloud/aws/aws.proto";
 
 option go_package = "github.com/buildbarn/bb-autoscaler/pkg/proto/configuration/bb_autoscaler";
 
@@ -37,6 +38,9 @@ message ApplicationConfiguration {
 
   // Auto Scaling Groups whose desired capacity should be adjusted.
   repeated NodeGroupConfiguration node_groups = 3;
+
+  // AWS access options and credentials.
+  buildbarn.configuration.cloud.aws.SessionConfiguration aws_session = 4;
 }
 
 message NodeGroupConfiguration {
