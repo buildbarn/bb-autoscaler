@@ -53,18 +53,10 @@ load("@io_bazel_rules_docker//go:image.bzl", _go_image_repos = "repositories")
 
 _go_image_repos()
 
-load("//:go_dependencies.bzl", "bb_autoscaler_go_dependencies")
+# gazelle:repository_macro go_dependencies.bzl%go_dependencies
+load(":go_dependencies.bzl", "go_dependencies")
 
-bb_autoscaler_go_dependencies()
-
-# TODO: This refers to a copy of go_dependencies.bzl that is manually
-# copied from the bb-storage repository. This is a requirement to make
-# "gazelle:repository_macro" work.
-# Details: https://github.com/bazelbuild/bazel-gazelle/issues/752
-# gazelle:repository_macro go_dependencies_bb_storage.bzl%bb_storage_go_dependencies
-load(":go_dependencies_bb_storage.bzl", "bb_storage_go_dependencies")
-
-bb_storage_go_dependencies()
+go_dependencies()
 
 load("@com_github_bazelbuild_remote_apis//:repository_rules.bzl", "switched_rules_by_language")
 
