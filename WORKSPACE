@@ -27,14 +27,6 @@ http_archive(
     ],
 )
 
-load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
-
-git_repository(
-    name = "com_github_buildbarn_bb_storage",
-    commit = "fb2a1e6bee7c403cf2579613ca07fabf1478eb11",
-    remote = "https://github.com/buildbarn/bb-storage.git",
-)
-
 load("@io_bazel_rules_docker//repositories:repositories.bzl", container_repositories = "repositories")
 
 container_repositories()
