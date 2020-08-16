@@ -1,4 +1,4 @@
-# Buildbarn Autoscaler [![Build status](https://github.com/buildbarn/bb-autoscaler/workflows/CI/badge.svg)](https://github.com/buildbarn/bb-autoscaler/actions) [![PkgGoDev](https://pkg.go.dev/badge/buildbarn/bb-autoscaler)](https://pkg.go.dev/buildbarn/bb-autoscaler) [![Go Report Card](https://goreportcard.com/badge/github.com/buildbarn/bb-autoscaler)](https://goreportcard.com/report/github.com/buildbarn/bb-autoscaler)
+# Buildbarn Autoscaler [![Build status](https://github.com/buildbarn/bb-autoscaler/workflows/master/badge.svg)](https://github.com/buildbarn/bb-autoscaler/actions) [![PkgGoDev](https://pkg.go.dev/badge/buildbarn/bb-autoscaler)](https://pkg.go.dev/buildbarn/bb-autoscaler) [![Go Report Card](https://goreportcard.com/badge/github.com/buildbarn/bb-autoscaler)](https://goreportcard.com/report/github.com/buildbarn/bb-autoscaler)
 
 This repository provides a utility that can be used in combination with
 [Buildbarn Remote Execution](https://github.com/buildbarn/bb-remote-execution)
