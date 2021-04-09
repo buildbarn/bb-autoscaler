@@ -43,6 +43,14 @@ message ApplicationConfiguration {
   buildbarn.configuration.cloud.aws.SessionConfiguration aws_session = 4;
 }
 
+message EKSManagedNodeGroupConfiguration {
+  // Name of the EKS cluster.
+  string cluster_name = 1;
+
+  // Name of the managed node group in the EKS cluster.
+  string node_group_name = 2;
+}
+
 message NodeGroupConfiguration {
   // The "instance_name" label that should be used to look up the
   // desired number of workers in the Prometheus query results.
@@ -52,9 +60,15 @@ message NodeGroupConfiguration {
   // number of workers in the Prometheus query results.
   build.bazel.remote.execution.v2.Platform platform = 2;
 
-  // The name of the AWS EC2 Auto Scaling Group (ASG) whose desired
-  // capacity should be adjusted.
-  string auto_scaling_group_name = 3;
+  oneof kind {
+    // The name of the AWS EC2 Auto Scaling Group (ASG) whose desired
+    // capacity should be adjusted.
+    string auto_scaling_group_name = 3;
+
+    // AWS EKS Managed Node Group whose desired capacity should be
+    // adjusted.
+    EKSManagedNodeGroupConfiguration eks_managed_node_group = 5;
+  }
 
   // The number of workers that constitute to a single unit of capacity.
   // In the general case, it should correspond to the bb-worker
