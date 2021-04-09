@@ -12,11 +12,12 @@ import (
 	"github.com/buildbarn/bb-autoscaler/pkg/proto/configuration/bb_autoscaler"
 	"github.com/buildbarn/bb-storage/pkg/cloud/aws"
 	"github.com/buildbarn/bb-storage/pkg/util"
-	"github.com/golang/protobuf/jsonpb"
-	"github.com/golang/protobuf/proto"
 	"github.com/prometheus/client_golang/api"
 	"github.com/prometheus/client_golang/api/prometheus/v1"
 	"github.com/prometheus/common/model"
+
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/encoding/prototext"
 )
 
 // bb_autoscaler: Automatically adjust the capacity of Amazon EC2 Auto
@@ -75,13 +76,13 @@ func main() {
 			log.Fatalf("Metric %s does not contain a \"platform\" label", sample.Metric)
 		}
 		var platform remoteexecution.Platform
-		if err := jsonpb.UnmarshalString(string(platformStr), &platform); err != nil {
+		if err := protojson.Unmarshal([]byte(platformStr), &platform); err != nil {
 			log.Fatal("Failed to unmarshal \"platform\" label of metric %s: %s", sample.Metric, err)
 		}
 
 		desiredWorkersMap[desiredWorkersKey{
 			instanceName: string(instanceName),
-			platform:     proto.MarshalTextString(&platform),
+			platform:     prototext.Format(&platform),
 		}] = float64(sample.Value)
 	}
 
@@ -92,9 +93,8 @@ func main() {
 	}
 	autoScaling := autoscaling.New(sess)
 	for _, nodeGroup := range configuration.NodeGroups {
-		var marshaler jsonpb.Marshaler
-		platformStr, _ := marshaler.MarshalToString(nodeGroup.Platform)
-		log.Printf("Instance %#v platform %s", nodeGroup.InstanceName, platformStr)
+		platform, _ := protojson.Marshal(nodeGroup.Platform)
+		log.Printf("Instance %#v platform %s", nodeGroup.InstanceName, string(platform))
 		workersPerCapacityUnit := nodeGroup.WorkersPerCapacityUnit
 		log.Print("Workers per capacity unit: ", workersPerCapacityUnit)
 

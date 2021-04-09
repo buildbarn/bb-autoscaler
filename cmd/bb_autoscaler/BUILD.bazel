@@ -13,11 +13,11 @@ go_library(
         "@com_github_bazelbuild_remote_apis//build/bazel/remote/execution/v2:execution",
         "@com_github_buildbarn_bb_storage//pkg/cloud/aws",
         "@com_github_buildbarn_bb_storage//pkg/util",
-        "@com_github_golang_protobuf//jsonpb:go_default_library_gen",
-        "@com_github_golang_protobuf//proto:go_default_library",
         "@com_github_prometheus_client_golang//api",
         "@com_github_prometheus_client_golang//api/prometheus/v1:prometheus",
         "@com_github_prometheus_common//model",
+        "@org_golang_google_protobuf//encoding/protojson",
+        "@org_golang_google_protobuf//encoding/prototext",
     ],
 )
 
