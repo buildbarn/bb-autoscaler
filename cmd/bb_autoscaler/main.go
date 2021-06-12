@@ -5,6 +5,7 @@ import (
 	"log"
 	"math"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/aws/aws-sdk-go/service/autoscaling"
@@ -63,6 +64,7 @@ func main() {
 	type desiredWorkersKey struct {
 		instanceName string
 		platform     string
+		sizeClass    uint32
 	}
 	vector := result.(model.Vector)
 	desiredWorkersMap := make(map[desiredWorkersKey]float64, len(vector))
@@ -81,9 +83,19 @@ func main() {
 			log.Fatal("Failed to unmarshal \"platform\" label of metric %s: %s", sample.Metric, err)
 		}
 
+		sizeClassStr, ok := sample.Metric["size_class"]
+		if !ok {
+			log.Fatalf("Metric %s does not contain a \"size_class\" label", sample.Metric)
+		}
+		sizeClass, err := strconv.ParseUint(string(sizeClassStr), 10, 32)
+		if err != nil {
+			log.Fatal("Failed to parse \"size_class\" label of metric %s: %s", sample.Metric, err)
+		}
+
 		desiredWorkersMap[desiredWorkersKey{
 			instanceName: string(instanceName),
 			platform:     prototext.Format(&platform),
+			sizeClass:    uint32(sizeClass),
 		}] = float64(sample.Value)
 	}
 
@@ -96,7 +108,7 @@ func main() {
 	eksSession := eks.New(sess)
 	for _, nodeGroup := range configuration.NodeGroups {
 		platform, _ := protojson.Marshal(nodeGroup.Platform)
-		log.Printf("Instance %#v platform %s", nodeGroup.InstanceName, string(platform))
+		log.Printf("Instance name %#v platform %s size class %d", nodeGroup.InstanceName, string(platform), nodeGroup.SizeClass)
 		workersPerCapacityUnit := nodeGroup.WorkersPerCapacityUnit
 		log.Print("Workers per capacity unit: ", workersPerCapacityUnit)
 
@@ -105,6 +117,7 @@ func main() {
 		desiredWorkers, ok := desiredWorkersMap[desiredWorkersKey{
 			instanceName: nodeGroup.InstanceName,
 			platform:     prototext.Format(nodeGroup.Platform),
+			sizeClass:    nodeGroup.SizeClass,
 		}]
 		if ok {
 			log.Print("Desired number of workers: ", desiredWorkers)
