@@ -16,7 +16,7 @@ message ApplicationConfiguration {
   // The PromQL query that should be sent to the Prometheus server to
   // obtain the desired number of workers for a bb-scheduler platform
   // queue. This PromQL may yield multiple rows. Each row should must
-  // have an "instance_name", "platform" and "size_class" label.
+  // have an "instance_name_prefix", "platform" and "size_class" label.
   //
   // Below is an example query that may be used, causing the desired
   // number of workers to be equal to the 95th percentile of load within
@@ -28,10 +28,10 @@ message ApplicationConfiguration {
   //   0.95,
   //   (
   //       sum(buildbarn_builder_in_memory_build_queue_tasks_queued_total)
-  //       by (instance_name, platform, size_class)
+  //       by (instance_name_prefix, platform, size_class)
   //     -
   //       sum(buildbarn_builder_in_memory_build_queue_tasks_executing_duration_seconds_count)
-  //       by (instance_name, platform, size_class)
+  //       by (instance_name_prefix, platform, size_class)
   //   )[4h:]
   // )
   string prometheus_query = 2;
@@ -52,9 +52,9 @@ message EKSManagedNodeGroupConfiguration {
 }
 
 message NodeGroupConfiguration {
-  // The "instance_name" label that should be used to look up the
+  // The "instance_name_prefix" label that should be used to look up the
   // desired number of workers in the Prometheus query results.
-  string instance_name = 1;
+  string instance_name_prefix = 1;
 
   // The "platform" label that should be used to look up the desired
   // number of workers in the Prometheus query results.

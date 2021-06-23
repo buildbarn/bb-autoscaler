@@ -62,17 +62,16 @@ func main() {
 	// Parse the metrics returned by Prometheus and convert them to
 	// a map that's indexed by the platform.
 	type desiredWorkersKey struct {
-		instanceName string
-		platform     string
-		sizeClass    uint32
+		instanceNamePrefix string
+		platform           string
+		sizeClass          uint32
 	}
 	vector := result.(model.Vector)
 	desiredWorkersMap := make(map[desiredWorkersKey]float64, len(vector))
 	for _, sample := range vector {
-		instanceName, ok := sample.Metric["instance_name"]
-		if !ok {
-			log.Fatalf("Metric %s does not contain an \"instance_name\" label", sample.Metric)
-		}
+		// Don't require instance_name_prefix to be present.
+		// When empty, Prometheus omits the label entirely.
+		instanceNamePrefix := sample.Metric["instance_name_prefix"]
 
 		platformStr, ok := sample.Metric["platform"]
 		if !ok {
@@ -93,9 +92,9 @@ func main() {
 		}
 
 		desiredWorkersMap[desiredWorkersKey{
-			instanceName: string(instanceName),
-			platform:     prototext.Format(&platform),
-			sizeClass:    uint32(sizeClass),
+			instanceNamePrefix: string(instanceNamePrefix),
+			platform:           prototext.Format(&platform),
+			sizeClass:          uint32(sizeClass),
 		}] = float64(sample.Value)
 	}
 
@@ -108,16 +107,16 @@ func main() {
 	eksSession := eks.New(sess)
 	for _, nodeGroup := range configuration.NodeGroups {
 		platform, _ := protojson.Marshal(nodeGroup.Platform)
-		log.Printf("Instance name %#v platform %s size class %d", nodeGroup.InstanceName, string(platform), nodeGroup.SizeClass)
+		log.Printf("Instance name prefix %#v platform %s size class %d", nodeGroup.InstanceNamePrefix, string(platform), nodeGroup.SizeClass)
 		workersPerCapacityUnit := nodeGroup.WorkersPerCapacityUnit
 		log.Print("Workers per capacity unit: ", workersPerCapacityUnit)
 
 		// Obtain the desired number of workers from the
 		// Prometheus metrics gathered previously.
 		desiredWorkers, ok := desiredWorkersMap[desiredWorkersKey{
-			instanceName: nodeGroup.InstanceName,
-			platform:     prototext.Format(nodeGroup.Platform),
-			sizeClass:    nodeGroup.SizeClass,
+			instanceNamePrefix: nodeGroup.InstanceNamePrefix,
+			platform:           prototext.Format(nodeGroup.Platform),
+			sizeClass:          nodeGroup.SizeClass,
 		}]
 		if ok {
 			log.Print("Desired number of workers: ", desiredWorkers)
