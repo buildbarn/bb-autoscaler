@@ -27,7 +27,7 @@ message ApplicationConfiguration {
   // quantile_over_time(
   //   0.95,
   //   (
-  //       sum(buildbarn_builder_in_memory_build_queue_tasks_queued_total)
+  //       sum(buildbarn_builder_in_memory_build_queue_tasks_scheduled_total)
   //       by (instance_name_prefix, platform, size_class)
   //     -
   //       sum(buildbarn_builder_in_memory_build_queue_tasks_executing_duration_seconds_count)
