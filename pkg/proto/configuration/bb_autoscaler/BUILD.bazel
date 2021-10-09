@@ -9,6 +9,7 @@ proto_library(
     deps = [
         "@com_github_bazelbuild_remote_apis//build/bazel/remote/execution/v2:remote_execution_proto",
         "@com_github_buildbarn_bb_storage//pkg/proto/configuration/cloud/aws:aws_proto",
+        "@com_github_buildbarn_bb_storage//pkg/proto/configuration/http:http_proto",
     ],
 )
 
@@ -20,6 +21,7 @@ go_proto_library(
     deps = [
         "@com_github_bazelbuild_remote_apis//build/bazel/remote/execution/v2:execution",
         "@com_github_buildbarn_bb_storage//pkg/proto/configuration/cloud/aws",
+        "@com_github_buildbarn_bb_storage//pkg/proto/configuration/http",
     ],
 )
 

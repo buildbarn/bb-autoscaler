@@ -14,6 +14,7 @@ import (
 	remoteexecution "github.com/bazelbuild/remote-apis/build/bazel/remote/execution/v2"
 	"github.com/buildbarn/bb-autoscaler/pkg/proto/configuration/bb_autoscaler"
 	"github.com/buildbarn/bb-storage/pkg/cloud/aws"
+	bb_http "github.com/buildbarn/bb-storage/pkg/http"
 	"github.com/buildbarn/bb-storage/pkg/util"
 	"github.com/prometheus/client_golang/api"
 	"github.com/prometheus/client_golang/api/prometheus/v1"
@@ -48,8 +49,13 @@ func main() {
 
 	// Obtain desired number of workers from Prometheus.
 	log.Printf("[1/2] Fetching desired worker count from Prometheus by running query %#v", configuration.PrometheusQuery)
+	prometheusRoundTripper, err := bb_http.NewRoundTripperFromConfiguration(configuration.PrometheusHttpClient)
+	if err != nil {
+		log.Fatal("Failed to create Prometheus HTTP client: ", err)
+	}
 	prometheusClient, err := api.NewClient(api.Config{
-		Address: configuration.PrometheusEndpoint,
+		Address:      configuration.PrometheusEndpoint,
+		RoundTripper: prometheusRoundTripper,
 	})
 	if err != nil {
 		log.Fatal("Error creating Prometheus client: ", err)

@@ -5,6 +5,8 @@ load("@bazel_gazelle//:def.bzl", "gazelle")
 # gazelle:resolve proto go build/bazel/remote/execution/v2/remote_execution.proto @com_github_bazelbuild_remote_apis//build/bazel/remote/execution/v2:execution
 # gazelle:resolve proto pkg/proto/configuration/cloud/aws/aws.proto @com_github_buildbarn_bb_storage//pkg/proto/configuration/cloud/aws:aws_proto
 # gazelle:resolve proto go pkg/proto/configuration/cloud/aws/aws.proto @com_github_buildbarn_bb_storage//pkg/proto/configuration/cloud/aws
+# gazelle:resolve proto pkg/proto/configuration/http/http.proto @com_github_buildbarn_bb_storage//pkg/proto/configuration/http:http_proto
+# gazelle:resolve proto go pkg/proto/configuration/http/http.proto @com_github_buildbarn_bb_storage//pkg/proto/configuration/http
 gazelle(
     name = "gazelle",
 )
