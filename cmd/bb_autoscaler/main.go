@@ -8,8 +8,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/aws/aws-sdk-go/service/autoscaling"
-	"github.com/aws/aws-sdk-go/service/eks"
+	"github.com/aws/aws-sdk-go-v2/service/autoscaling"
+	"github.com/aws/aws-sdk-go-v2/service/eks"
+	"github.com/aws/aws-sdk-go-v2/service/eks/types"
 	remoteexecution "github.com/bazelbuild/remote-apis/build/bazel/remote/execution/v2"
 	"github.com/buildbarn/bb-autoscaler/pkg/proto/configuration/bb_autoscaler"
 	"github.com/buildbarn/bb-storage/pkg/cloud/aws"
@@ -53,8 +54,9 @@ func main() {
 	if err != nil {
 		log.Fatal("Error creating Prometheus client: ", err)
 	}
+	ctx := context.Background()
 	v1api := v1.NewAPI(prometheusClient)
-	result, _, err := v1api.Query(context.Background(), configuration.PrometheusQuery, time.Now())
+	result, _, err := v1api.Query(ctx, configuration.PrometheusQuery, time.Now())
 	if err != nil {
 		log.Fatal("Error querying Prometheus: ", err)
 	}
@@ -99,12 +101,12 @@ func main() {
 	}
 
 	log.Print("[2/2] Adjusting desired capacity of ASGs")
-	sess, err := aws.NewSessionFromConfiguration(configuration.AwsSession)
+	cfg, err := aws.NewConfigFromConfiguration(configuration.AwsSession)
 	if err != nil {
 		log.Fatal("Failed to create AWS session: ", err)
 	}
-	autoScaling := autoscaling.New(sess)
-	eksSession := eks.New(sess)
+	autoScalingClient := autoscaling.NewFromConfig(cfg)
+	eksClient := eks.NewFromConfig(cfg)
 	for _, nodeGroup := range configuration.NodeGroups {
 		platform, _ := protojson.Marshal(nodeGroup.Platform)
 		log.Printf("Instance name prefix %#v platform %s size class %d", nodeGroup.InstanceNamePrefix, string(platform), nodeGroup.SizeClass)
@@ -123,12 +125,13 @@ func main() {
 
 			// Obtain the minimum/maximum size of the ASG,
 			// so that we can clamp the desired capacity.
-			var oldDesiredCapacity, minSize, maxSize int64
+			var oldDesiredCapacity, minSize, maxSize int32
 			switch kind := nodeGroup.Kind.(type) {
 			case *bb_autoscaler.NodeGroupConfiguration_AutoScalingGroupName:
-				output, err := autoScaling.DescribeAutoScalingGroups(
+				output, err := autoScalingClient.DescribeAutoScalingGroups(
+					ctx,
 					&autoscaling.DescribeAutoScalingGroupsInput{
-						AutoScalingGroupNames: []*string{&kind.AutoScalingGroupName},
+						AutoScalingGroupNames: []string{kind.AutoScalingGroupName},
 					})
 				if err != nil {
 					log.Fatalf("Failed to obtain properties of ASG %#v: %s", kind.AutoScalingGroupName, err)
@@ -141,7 +144,8 @@ func main() {
 				minSize = *asg.MinSize
 				maxSize = *asg.MaxSize
 			case *bb_autoscaler.NodeGroupConfiguration_EksManagedNodeGroup:
-				output, err := eksSession.DescribeNodegroup(
+				output, err := eksClient.DescribeNodegroup(
+					ctx,
 					&eks.DescribeNodegroupInput{
 						ClusterName:   &kind.EksManagedNodeGroup.ClusterName,
 						NodegroupName: &kind.EksManagedNodeGroup.NodeGroupName,
@@ -161,7 +165,7 @@ func main() {
 
 			// Translate the desired number of workers to
 			// the desired ASG capacity.
-			newDesiredCapacity := (int64(math.Ceil(desiredWorkers)) + workersPerCapacityUnit - 1) / workersPerCapacityUnit
+			newDesiredCapacity := (int32(math.Ceil(desiredWorkers)) + workersPerCapacityUnit - 1) / workersPerCapacityUnit
 			if newDesiredCapacity < minSize {
 				newDesiredCapacity = minSize
 			}
@@ -177,17 +181,17 @@ func main() {
 
 				switch kind := nodeGroup.Kind.(type) {
 				case *bb_autoscaler.NodeGroupConfiguration_AutoScalingGroupName:
-					if _, err := autoScaling.SetDesiredCapacity(&autoscaling.SetDesiredCapacityInput{
+					if _, err := autoScalingClient.SetDesiredCapacity(ctx, &autoscaling.SetDesiredCapacityInput{
 						AutoScalingGroupName: &kind.AutoScalingGroupName,
 						DesiredCapacity:      &newDesiredCapacity,
 					}); err != nil {
 						log.Fatalf("Failed to set desired capacity of ASG %#v: %s", kind.AutoScalingGroupName, err)
 					}
 				case *bb_autoscaler.NodeGroupConfiguration_EksManagedNodeGroup:
-					if _, err := eksSession.UpdateNodegroupConfig(&eks.UpdateNodegroupConfigInput{
+					if _, err := eksClient.UpdateNodegroupConfig(ctx, &eks.UpdateNodegroupConfigInput{
 						ClusterName:   &kind.EksManagedNodeGroup.ClusterName,
 						NodegroupName: &kind.EksManagedNodeGroup.NodeGroupName,
-						ScalingConfig: &eks.NodegroupScalingConfig{
+						ScalingConfig: &types.NodegroupScalingConfig{
 							DesiredSize: &newDesiredCapacity,
 						},
 					}); err != nil {

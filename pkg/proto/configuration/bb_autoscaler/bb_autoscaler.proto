@@ -81,5 +81,5 @@ message NodeGroupConfiguration {
   // When Mixed Instance Policies are used, it is advised that this
   // field is set to 1, and that the WeightedCapacity of every EC2
   // instance type is set to its actual concurrency.
-  int64 workers_per_capacity_unit = 4;
+  int32 workers_per_capacity_unit = 4;
 }
