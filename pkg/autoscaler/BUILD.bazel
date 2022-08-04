@@ -1,0 +1,31 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "autoscaler",
+    srcs = ["size_class_queue_key.go"],
+    importpath = "github.com/buildbarn/bb-autoscaler/pkg/autoscaler",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_bazelbuild_remote_apis//build/bazel/remote/execution/v2:execution",
+        "@com_github_buildbarn_bb_storage//pkg/util",
+        "@com_github_prometheus_common//model",
+        "@org_golang_google_grpc//codes",
+        "@org_golang_google_grpc//status",
+        "@org_golang_google_protobuf//encoding/protojson",
+        "@org_golang_google_protobuf//encoding/prototext",
+    ],
+)
+
+go_test(
+    name = "autoscaler_test",
+    srcs = ["size_class_queue_key_test.go"],
+    deps = [
+        ":autoscaler",
+        "@com_github_bazelbuild_remote_apis//build/bazel/remote/execution/v2:execution",
+        "@com_github_buildbarn_bb_storage//pkg/testutil",
+        "@com_github_prometheus_common//model",
+        "@com_github_stretchr_testify//require",
+        "@org_golang_google_grpc//codes",
+        "@org_golang_google_grpc//status",
+    ],
+)

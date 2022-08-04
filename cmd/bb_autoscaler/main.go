@@ -5,13 +5,12 @@ import (
 	"log"
 	"math"
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/service/autoscaling"
 	"github.com/aws/aws-sdk-go-v2/service/eks"
 	"github.com/aws/aws-sdk-go-v2/service/eks/types"
-	remoteexecution "github.com/bazelbuild/remote-apis/build/bazel/remote/execution/v2"
+	"github.com/buildbarn/bb-autoscaler/pkg/autoscaler"
 	"github.com/buildbarn/bb-autoscaler/pkg/proto/configuration/bb_autoscaler"
 	"github.com/buildbarn/bb-storage/pkg/cloud/aws"
 	bb_http "github.com/buildbarn/bb-storage/pkg/http"
@@ -21,7 +20,6 @@ import (
 	"github.com/prometheus/common/model"
 
 	"google.golang.org/protobuf/encoding/protojson"
-	"google.golang.org/protobuf/encoding/prototext"
 )
 
 // bb_autoscaler: Automatically adjust the capacity of Amazon EC2 Auto
@@ -69,41 +67,15 @@ func main() {
 
 	// Parse the metrics returned by Prometheus and convert them to
 	// a map that's indexed by the platform.
-	type desiredWorkersKey struct {
-		instanceNamePrefix string
-		platform           string
-		sizeClass          uint32
-	}
 	vector := result.(model.Vector)
-	desiredWorkersMap := make(map[desiredWorkersKey]float64, len(vector))
+	desiredWorkersMap := make(map[autoscaler.SizeClassQueueKey]float64, len(vector))
 	for _, sample := range vector {
-		// Don't require instance_name_prefix to be present.
-		// When empty, Prometheus omits the label entirely.
-		instanceNamePrefix := sample.Metric["instance_name_prefix"]
-
-		platformStr, ok := sample.Metric["platform"]
-		if !ok {
-			log.Fatalf("Metric %s does not contain a \"platform\" label", sample.Metric)
-		}
-		var platform remoteexecution.Platform
-		if err := protojson.Unmarshal([]byte(platformStr), &platform); err != nil {
-			log.Fatal("Failed to unmarshal \"platform\" label of metric %s: %s", sample.Metric, err)
-		}
-
-		sizeClassStr, ok := sample.Metric["size_class"]
-		if !ok {
-			log.Fatalf("Metric %s does not contain a \"size_class\" label", sample.Metric)
-		}
-		sizeClass, err := strconv.ParseUint(string(sizeClassStr), 10, 32)
+		sizeClassQueueKey, err := autoscaler.NewSizeClassQueueKeyFromMetric(sample.Metric)
 		if err != nil {
-			log.Fatal("Failed to parse \"size_class\" label of metric %s: %s", sample.Metric, err)
+			log.Fatalf("Metric %s: %s", sample.Metric, err)
 		}
 
-		desiredWorkersMap[desiredWorkersKey{
-			instanceNamePrefix: string(instanceNamePrefix),
-			platform:           prototext.Format(&platform),
-			sizeClass:          uint32(sizeClass),
-		}] = float64(sample.Value)
+		desiredWorkersMap[sizeClassQueueKey] = float64(sample.Value)
 	}
 
 	log.Print("[2/2] Adjusting desired capacity of ASGs")
@@ -121,11 +93,11 @@ func main() {
 
 		// Obtain the desired number of workers from the
 		// Prometheus metrics gathered previously.
-		desiredWorkers, ok := desiredWorkersMap[desiredWorkersKey{
-			instanceNamePrefix: nodeGroup.InstanceNamePrefix,
-			platform:           prototext.Format(nodeGroup.Platform),
-			sizeClass:          nodeGroup.SizeClass,
-		}]
+		desiredWorkers, ok := desiredWorkersMap[autoscaler.NewSizeClassQueueKeyFromConfiguration(
+			nodeGroup.InstanceNamePrefix,
+			nodeGroup.Platform,
+			nodeGroup.SizeClass,
+		)]
 		if ok {
 			log.Print("Desired number of workers: ", desiredWorkers)
 

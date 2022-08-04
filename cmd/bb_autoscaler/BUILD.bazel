@@ -8,11 +8,11 @@ go_library(
     importpath = "github.com/buildbarn/bb-autoscaler/cmd/bb_autoscaler",
     visibility = ["//visibility:private"],
     deps = [
+        "//pkg/autoscaler",
         "//pkg/proto/configuration/bb_autoscaler",
         "@com_github_aws_aws_sdk_go_v2_service_autoscaling//:autoscaling",
         "@com_github_aws_aws_sdk_go_v2_service_eks//:eks",
         "@com_github_aws_aws_sdk_go_v2_service_eks//types",
-        "@com_github_bazelbuild_remote_apis//build/bazel/remote/execution/v2:execution",
         "@com_github_buildbarn_bb_storage//pkg/cloud/aws",
         "@com_github_buildbarn_bb_storage//pkg/http",
         "@com_github_buildbarn_bb_storage//pkg/util",
@@ -20,7 +20,6 @@ go_library(
         "@com_github_prometheus_client_golang//api/prometheus/v1:prometheus",
         "@com_github_prometheus_common//model",
         "@org_golang_google_protobuf//encoding/protojson",
-        "@org_golang_google_protobuf//encoding/prototext",
     ],
 )
 
