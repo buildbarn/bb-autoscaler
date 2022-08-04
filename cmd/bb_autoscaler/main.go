@@ -107,7 +107,7 @@ func main() {
 	}
 
 	log.Print("[2/2] Adjusting desired capacity of ASGs")
-	cfg, err := aws.NewConfigFromConfiguration(configuration.AwsSession)
+	cfg, err := aws.NewConfigFromConfiguration(configuration.AwsSession, "Autoscaling")
 	if err != nil {
 		log.Fatal("Failed to create AWS session: ", err)
 	}
