@@ -41,10 +41,13 @@ message ApplicationConfiguration {
   // )
   string prometheus_query = 2;
 
-  // Auto Scaling Groups whose desired capacity should be adjusted.
+  // AWS Auto Scaling Groups or Kubernetes deployments whose desired
+  // capacity/replicas count should be adjusted.
   repeated NodeGroupConfiguration node_groups = 3;
 
-  // AWS access options and credentials.
+  // AWS access options and credentials. This option only has effect
+  // when 'node_groups' contains one or more entries for AWS EC2 Auto
+  // Scaling Groups (ASGs) or EKS Managed Node Groups.
   buildbarn.configuration.cloud.aws.SessionConfiguration aws_session = 4;
 }
 
@@ -54,6 +57,21 @@ message EKSManagedNodeGroupConfiguration {
 
   // Name of the managed node group in the EKS cluster.
   string node_group_name = 2;
+}
+
+message KubernetesDeploymentConfiguration {
+  // Namespace containing the deployment whose replicas count should be
+  // adjusted.
+  string namespace = 1;
+
+  // Name of the deployment whose replicas count should be adjusted.
+  string name = 2;
+
+  // The minimum number of replicas to use.
+  int32 minimum_replicas = 3;
+
+  // The maximum number of replicas to use.
+  int32 maximum_replicas = 4;
 }
 
 message NodeGroupConfiguration {
@@ -71,19 +89,26 @@ message NodeGroupConfiguration {
 
   oneof kind {
     // The name of the AWS EC2 Auto Scaling Group (ASG) whose desired
-    // capacity should be adjusted.
+    // capacity should be adjusted. The desired capacity shall be
+    // adjusted to a value that lies between the minimum and maximum
+    // size of the ASG.
     string auto_scaling_group_name = 3;
 
     // AWS EKS Managed Node Group whose desired capacity should be
-    // adjusted.
+    // adjusted. The desired capacity shall be adjusted to a value that
+    // lies between the minimum and maximum size of the Managed Node
+    // Group.
     EKSManagedNodeGroupConfiguration eks_managed_node_group = 5;
+
+    // Kubernetes deployment whose replicas count should be adjusted.
+    KubernetesDeploymentConfiguration kubernetes_deployment = 7;
   }
 
   // The number of workers that constitute to a single unit of capacity.
   // In the general case, it should correspond to the bb-worker
-  // concurrency of a single EC2 instance.
+  // concurrency of a single EC2 instance or Kubernetes pod.
   //
-  // When Mixed Instance Policies are used, it is advised that this
+  // When EC2 Mixed Instance Policies are used, it is advised that this
   // field is set to 1, and that the WeightedCapacity of every EC2
   // instance type is set to its actual concurrency.
   int32 workers_per_capacity_unit = 4;
