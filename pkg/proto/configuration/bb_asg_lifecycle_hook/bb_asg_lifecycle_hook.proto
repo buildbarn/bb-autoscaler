@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package buildbarn.configuration.bb_asg_lifecycle_hook;
+
+import "pkg/proto/configuration/cloud/aws/aws.proto";
+import "pkg/proto/configuration/global/global.proto";
+import "pkg/proto/configuration/grpc/grpc.proto";
+
+option go_package = "github.com/buildbarn/bb-autoscaler/pkg/proto/configuration/bb_asg_lifecycle_hook";
+
+message ApplicationConfiguration {
+  // Common configuration options that apply to all Buildbarn binaries.
+  buildbarn.configuration.global.Configuration global = 1;
+
+  // AWS access options and credentials.
+  buildbarn.configuration.cloud.aws.SessionConfiguration aws_session = 2;
+
+  // The URL of the Simple Queue Service (SQS) queue where
+  // "autoscaling:EC2_INSTANCE_TERMINATING" events are posted.
+  string sqs_url = 3;
+
+  // Endpoint of the scheduler's build queue state service.
+  buildbarn.configuration.grpc.ClientConfiguration scheduler = 4;
+
+  // Label that should be used to match the instance ID of the EC2
+  // instance (i-*) against workers known by the scheduler. For example,
+  // if your workers are all called {"instance": "i-*", "thread": "*"},
+  // then this configuration option should be set to "instance".
+  //
+  // On systems like Amazon EKS, it is possible to attach an instance ID
+  // label to workers by creating an initContainer that stores the
+  // contents of http://169.254.169.254/latest/meta-data/instance-id in
+  // a file in an emptyDir. This file can then be loaded by bb_worker on
+  // startup using Jsonnet's importstr command.
+  //
+  // Setting this configuration option incorrectly may cause the
+  // scheduler to not drain the right set of workers.
+  string instance_id_label = 5;
+}

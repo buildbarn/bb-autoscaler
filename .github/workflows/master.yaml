@@ -56,6 +56,18 @@
                "run": "bazel test --test_output=errors --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //..."
             },
             {
+               "name": "linux_amd64: copy bb_asg_lifecycle_hook",
+               "run": "rm -f bb_asg_lifecycle_hook && bazel run --run_under cp --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //cmd/bb_asg_lifecycle_hook $(pwd)/bb_asg_lifecycle_hook"
+            },
+            {
+               "name": "linux_amd64: upload bb_asg_lifecycle_hook",
+               "uses": "actions/upload-artifact@v2-preview",
+               "with": {
+                  "name": "bb_asg_lifecycle_hook.linux_amd64",
+                  "path": "bb_asg_lifecycle_hook"
+               }
+            },
+            {
                "name": "linux_amd64: copy bb_autoscaler",
                "run": "rm -f bb_autoscaler && bazel run --run_under cp --platforms=@io_bazel_rules_go//go/toolchain:linux_amd64 //cmd/bb_autoscaler $(pwd)/bb_autoscaler"
             },
@@ -70,6 +82,18 @@
             {
                "name": "linux_386: build and test",
                "run": "bazel test --test_output=errors --platforms=@io_bazel_rules_go//go/toolchain:linux_386 //..."
+            },
+            {
+               "name": "linux_386: copy bb_asg_lifecycle_hook",
+               "run": "rm -f bb_asg_lifecycle_hook && bazel run --run_under cp --platforms=@io_bazel_rules_go//go/toolchain:linux_386 //cmd/bb_asg_lifecycle_hook $(pwd)/bb_asg_lifecycle_hook"
+            },
+            {
+               "name": "linux_386: upload bb_asg_lifecycle_hook",
+               "uses": "actions/upload-artifact@v2-preview",
+               "with": {
+                  "name": "bb_asg_lifecycle_hook.linux_386",
+                  "path": "bb_asg_lifecycle_hook"
+               }
             },
             {
                "name": "linux_386: copy bb_autoscaler",
@@ -88,6 +112,18 @@
                "run": "bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_arm //..."
             },
             {
+               "name": "linux_arm: copy bb_asg_lifecycle_hook",
+               "run": "rm -f bb_asg_lifecycle_hook && bazel run --run_under cp --platforms=@io_bazel_rules_go//go/toolchain:linux_arm //cmd/bb_asg_lifecycle_hook $(pwd)/bb_asg_lifecycle_hook"
+            },
+            {
+               "name": "linux_arm: upload bb_asg_lifecycle_hook",
+               "uses": "actions/upload-artifact@v2-preview",
+               "with": {
+                  "name": "bb_asg_lifecycle_hook.linux_arm",
+                  "path": "bb_asg_lifecycle_hook"
+               }
+            },
+            {
                "name": "linux_arm: copy bb_autoscaler",
                "run": "rm -f bb_autoscaler && bazel run --run_under cp --platforms=@io_bazel_rules_go//go/toolchain:linux_arm //cmd/bb_autoscaler $(pwd)/bb_autoscaler"
             },
@@ -102,6 +138,18 @@
             {
                "name": "linux_arm64: build and test",
                "run": "bazel build --platforms=@io_bazel_rules_go//go/toolchain:linux_arm64 //..."
+            },
+            {
+               "name": "linux_arm64: copy bb_asg_lifecycle_hook",
+               "run": "rm -f bb_asg_lifecycle_hook && bazel run --run_under cp --platforms=@io_bazel_rules_go//go/toolchain:linux_arm64 //cmd/bb_asg_lifecycle_hook $(pwd)/bb_asg_lifecycle_hook"
+            },
+            {
+               "name": "linux_arm64: upload bb_asg_lifecycle_hook",
+               "uses": "actions/upload-artifact@v2-preview",
+               "with": {
+                  "name": "bb_asg_lifecycle_hook.linux_arm64",
+                  "path": "bb_asg_lifecycle_hook"
+               }
             },
             {
                "name": "linux_arm64: copy bb_autoscaler",
@@ -120,6 +168,18 @@
                "run": "bazel build --platforms=@io_bazel_rules_go//go/toolchain:darwin_amd64 //..."
             },
             {
+               "name": "darwin_amd64: copy bb_asg_lifecycle_hook",
+               "run": "rm -f bb_asg_lifecycle_hook && bazel run --run_under cp --platforms=@io_bazel_rules_go//go/toolchain:darwin_amd64 //cmd/bb_asg_lifecycle_hook $(pwd)/bb_asg_lifecycle_hook"
+            },
+            {
+               "name": "darwin_amd64: upload bb_asg_lifecycle_hook",
+               "uses": "actions/upload-artifact@v2-preview",
+               "with": {
+                  "name": "bb_asg_lifecycle_hook.darwin_amd64",
+                  "path": "bb_asg_lifecycle_hook"
+               }
+            },
+            {
                "name": "darwin_amd64: copy bb_autoscaler",
                "run": "rm -f bb_autoscaler && bazel run --run_under cp --platforms=@io_bazel_rules_go//go/toolchain:darwin_amd64 //cmd/bb_autoscaler $(pwd)/bb_autoscaler"
             },
@@ -136,6 +196,18 @@
                "run": "bazel build --platforms=@io_bazel_rules_go//go/toolchain:darwin_arm64 //..."
             },
             {
+               "name": "darwin_arm64: copy bb_asg_lifecycle_hook",
+               "run": "rm -f bb_asg_lifecycle_hook && bazel run --run_under cp --platforms=@io_bazel_rules_go//go/toolchain:darwin_arm64 //cmd/bb_asg_lifecycle_hook $(pwd)/bb_asg_lifecycle_hook"
+            },
+            {
+               "name": "darwin_arm64: upload bb_asg_lifecycle_hook",
+               "uses": "actions/upload-artifact@v2-preview",
+               "with": {
+                  "name": "bb_asg_lifecycle_hook.darwin_arm64",
+                  "path": "bb_asg_lifecycle_hook"
+               }
+            },
+            {
                "name": "darwin_arm64: copy bb_autoscaler",
                "run": "rm -f bb_autoscaler && bazel run --run_under cp --platforms=@io_bazel_rules_go//go/toolchain:darwin_arm64 //cmd/bb_autoscaler $(pwd)/bb_autoscaler"
             },
@@ -149,7 +221,19 @@
             },
             {
                "name": "freebsd_amd64: build and test",
-               "run": "bazel build --platforms=@io_bazel_rules_go//go/toolchain:freebsd_amd64 //cmd/bb_autoscaler"
+               "run": "bazel build --platforms=@io_bazel_rules_go//go/toolchain:freebsd_amd64 //cmd/bb_asg_lifecycle_hook //cmd/bb_autoscaler"
+            },
+            {
+               "name": "freebsd_amd64: copy bb_asg_lifecycle_hook",
+               "run": "rm -f bb_asg_lifecycle_hook && bazel run --run_under cp --platforms=@io_bazel_rules_go//go/toolchain:freebsd_amd64 //cmd/bb_asg_lifecycle_hook $(pwd)/bb_asg_lifecycle_hook"
+            },
+            {
+               "name": "freebsd_amd64: upload bb_asg_lifecycle_hook",
+               "uses": "actions/upload-artifact@v2-preview",
+               "with": {
+                  "name": "bb_asg_lifecycle_hook.freebsd_amd64",
+                  "path": "bb_asg_lifecycle_hook"
+               }
             },
             {
                "name": "freebsd_amd64: copy bb_autoscaler",
@@ -166,6 +250,18 @@
             {
                "name": "windows_amd64: build and test",
                "run": "bazel build --platforms=@io_bazel_rules_go//go/toolchain:windows_amd64 //..."
+            },
+            {
+               "name": "windows_amd64: copy bb_asg_lifecycle_hook",
+               "run": "rm -f bb_asg_lifecycle_hook.exe && bazel run --run_under cp --platforms=@io_bazel_rules_go//go/toolchain:windows_amd64 //cmd/bb_asg_lifecycle_hook $(pwd)/bb_asg_lifecycle_hook.exe"
+            },
+            {
+               "name": "windows_amd64: upload bb_asg_lifecycle_hook",
+               "uses": "actions/upload-artifact@v2-preview",
+               "with": {
+                  "name": "bb_asg_lifecycle_hook.windows_amd64",
+                  "path": "bb_asg_lifecycle_hook.exe"
+               }
             },
             {
                "name": "windows_amd64: copy bb_autoscaler",
@@ -185,6 +281,10 @@
                },
                "name": "Install Docker credentials",
                "run": "echo \"${GITHUB_TOKEN}\" | docker login ghcr.io -u $ --password-stdin"
+            },
+            {
+               "name": "Push container bb_asg_lifecycle_hook:bb_asg_lifecycle_hook",
+               "run": "bazel run --stamp //cmd/bb_asg_lifecycle_hook:bb_asg_lifecycle_hook_container_push"
             },
             {
                "name": "Push container bb_autoscaler:bb_autoscaler",

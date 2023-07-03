@@ -26,6 +26,20 @@ http_archive(
     ],
 )
 
+load("@bazel_gazelle//:deps.bzl", "go_repository")
+
+# Override the version of gomock to one that includes support for
+# generating mocks for function types. We can't do this through go.mod,
+# as it causes almost all of our package dependencies to be downgraded.
+go_repository(
+    name = "com_github_golang_mock",
+    importpath = "github.com/golang/mock",
+    patches = ["@com_github_buildbarn_bb_storage//:patches/com_github_golang_mock/mocks-for-funcs.diff"],
+    replace = "github.com/golang/mock",
+    sum = "h1:DxRM2MRFDKF8JGaT1ZSsCZ9KxoOki+rrOoB011jIEDc=",
+    version = "v1.6.1-0.20220512030613-73266f9366fc",
+)
+
 # gazelle:repository_macro go_dependencies.bzl%go_dependencies
 load(":go_dependencies.bzl", "go_dependencies")
 
@@ -104,3 +118,54 @@ jsonnet_go_repositories()
 load("@google_jsonnet_go//bazel:deps.bzl", "jsonnet_go_dependencies")
 
 jsonnet_go_dependencies()
+
+http_archive(
+    name = "com_github_twbs_bootstrap",
+    build_file_content = """exports_files(["css/bootstrap.min.css", "js/bootstrap.min.js"])""",
+    sha256 = "395342b2974e3350560e65752d36aab6573652b11cc6cb5ef79a2e5e83ad64b1",
+    strip_prefix = "bootstrap-5.1.0-dist",
+    urls = ["https://github.com/twbs/bootstrap/releases/download/v5.1.0/bootstrap-5.1.0-dist.zip"],
+)
+
+http_archive(
+    name = "aspect_rules_js",
+    sha256 = "00e7b97b696af63812df0ca9e9dbd18579f3edd3ab9a56f227238b8405e4051c",
+    strip_prefix = "rules_js-1.23.0",
+    url = "https://github.com/aspect-build/rules_js/releases/download/v1.23.0/rules_js-v1.23.0.tar.gz",
+)
+
+load("@aspect_rules_js//js:repositories.bzl", "rules_js_dependencies")
+
+rules_js_dependencies()
+
+load("@rules_nodejs//nodejs:repositories.bzl", "DEFAULT_NODE_VERSION", "nodejs_register_toolchains")
+
+nodejs_register_toolchains(
+    name = "nodejs",
+    node_version = DEFAULT_NODE_VERSION,
+)
+
+load("@aspect_rules_js//npm:npm_import.bzl", "npm_translate_lock")
+
+npm_translate_lock(
+    name = "npm",
+    pnpm_lock = "@com_github_buildbarn_bb_storage//:pnpm-lock.yaml",
+)
+
+load("@npm//:repositories.bzl", "npm_repositories")
+
+npm_repositories()
+
+http_archive(
+    name = "io_opentelemetry_proto",
+    build_file_content = """
+proto_library(
+    name = "common_proto",
+    srcs = ["opentelemetry/proto/common/v1/common.proto"],
+    visibility = ["//visibility:public"],
+)
+""",
+    sha256 = "464bc2b348e674a1a03142e403cbccb01be8655b6de0f8bfe733ea31fcd421be",
+    strip_prefix = "opentelemetry-proto-0.19.0",
+    urls = ["https://github.com/open-telemetry/opentelemetry-proto/archive/refs/tags/v0.19.0.tar.gz"],
+)
