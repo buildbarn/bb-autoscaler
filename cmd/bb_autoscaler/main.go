@@ -46,7 +46,7 @@ import (
 // max_over_time(), etc.
 
 func main() {
-	program.Run(func(ctx context.Context, siblingsGroup, dependenciesGroup program.Group) error {
+	program.RunMain(func(ctx context.Context, siblingsGroup, dependenciesGroup program.Group) error {
 		if len(os.Args) != 2 {
 			return status.Error(codes.InvalidArgument, "Usage: bb_autoscaler bb_autoscaler.jsonnet")
 		}
