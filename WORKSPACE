@@ -3,26 +3,47 @@ workspace(name = "com_github_buildbarn_bb_autoscaler")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
-    name = "io_bazel_rules_docker",
-    sha256 = "b1e80761a8a8243d03ebca8845e9cc1ba6c82ce7c5179ce2b295cd36f7e394bf",
-    urls = ["https://github.com/bazelbuild/rules_docker/releases/download/v0.25.0/rules_docker-v0.25.0.tar.gz"],
+    name = "rules_pkg",
+    sha256 = "8f9ee2dc10c1ae514ee599a8b42ed99fa262b757058f65ad3c384289ff70c4b8",
+    urls = [
+        "https://mirror.bazel.build/github.com/bazelbuild/rules_pkg/releases/download/0.9.1/rules_pkg-0.9.1.tar.gz",
+        "https://github.com/bazelbuild/rules_pkg/releases/download/0.9.1/rules_pkg-0.9.1.tar.gz",
+    ],
+)
+
+http_archive(
+    name = "aspect_bazel_lib",
+    sha256 = "6c25c59581041ede31e117693047f972cc4700c89acf913658dc89d04c338f8d",
+    strip_prefix = "bazel-lib-2.5.3",
+    url = "https://github.com/aspect-build/bazel-lib/releases/download/v2.5.3/bazel-lib-v2.5.3.tar.gz",
+)
+
+load("@aspect_bazel_lib//lib:repositories.bzl", "register_expand_template_toolchains")
+
+register_expand_template_toolchains()
+
+http_archive(
+    name = "rules_oci",
+    sha256 = "4a276e9566c03491649eef63f27c2816cc222f41ccdebd97d2c5159e84917c3b",
+    strip_prefix = "rules_oci-1.7.4",
+    url = "https://github.com/bazel-contrib/rules_oci/releases/download/v1.7.4/rules_oci-v1.7.4.tar.gz",
 )
 
 http_archive(
     name = "io_bazel_rules_go",
-    sha256 = "dd926a88a564a9246713a9c00b35315f54cbd46b31a26d5d8fb264c07045f05d",
+    sha256 = "91585017debb61982f7054c9688857a2ad1fd823fc3f9cb05048b0025c47d023",
     urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/rules_go/releases/download/v0.38.1/rules_go-v0.38.1.zip",
-        "https://github.com/bazelbuild/rules_go/releases/download/v0.38.1/rules_go-v0.38.1.zip",
+        "https://mirror.bazel.build/github.com/bazelbuild/rules_go/releases/download/v0.42.0/rules_go-v0.42.0.zip",
+        "https://github.com/bazelbuild/rules_go/releases/download/v0.42.0/rules_go-v0.42.0.zip",
     ],
 )
 
 http_archive(
     name = "bazel_gazelle",
-    sha256 = "ecba0f04f96b4960a5b250c8e8eeec42281035970aa8852dda73098274d14a1d",
+    sha256 = "b7387f72efb59f876e4daae42f1d3912d0d45563eac7cb23d1de0b094ab588cf",
     urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/bazel-gazelle/releases/download/v0.29.0/bazel-gazelle-v0.29.0.tar.gz",
-        "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.29.0/bazel-gazelle-v0.29.0.tar.gz",
+        "https://mirror.bazel.build/github.com/bazelbuild/bazel-gazelle/releases/download/v0.34.0/bazel-gazelle-v0.34.0.tar.gz",
+        "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.34.0/bazel-gazelle-v0.34.0.tar.gz",
     ],
 )
 
@@ -49,23 +70,29 @@ load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_depe
 
 go_rules_dependencies()
 
-go_register_toolchains(version = "1.20.1")
-
-load("@io_bazel_rules_docker//repositories:repositories.bzl", container_repositories = "repositories")
-
-container_repositories()
-
-load("@io_bazel_rules_docker//repositories:deps.bzl", container_deps = "deps")
-
-container_deps()
+go_register_toolchains(version = "1.21.5")
 
 load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
 
 gazelle_dependencies()
 
-load("@io_bazel_rules_docker//go:image.bzl", _go_image_repos = "repositories")
+load("@rules_oci//oci:pull.bzl", "oci_pull")
+load("@rules_oci//oci:repositories.bzl", "LATEST_CRANE_VERSION", "oci_register_toolchains")
 
-_go_image_repos()
+oci_register_toolchains(
+    name = "oci",
+    crane_version = LATEST_CRANE_VERSION,
+)
+
+oci_pull(
+    name = "distroless_static",
+    digest = "sha256:7e5c6a2a4ae854242874d36171b31d26e0539c98fc6080f942f16b03e82851ab",
+    image = "gcr.io/distroless/static",
+    platforms = [
+        "linux/amd64",
+        "linux/arm64/v8",
+    ],
+)
 
 load("@com_github_bazelbuild_remote_apis//:repository_rules.bzl", "switched_rules_by_language")
 
@@ -76,9 +103,9 @@ switched_rules_by_language(
 
 http_archive(
     name = "com_google_protobuf",
-    sha256 = "ba0650be1b169d24908eeddbe6107f011d8df0da5b1a5a4449a913b10e578faf",
-    strip_prefix = "protobuf-3.19.4",
-    urls = ["https://github.com/protocolbuffers/protobuf/releases/download/v3.19.4/protobuf-all-3.19.4.tar.gz"],
+    sha256 = "a700a49470d301f1190a487a923b5095bf60f08f4ae4cac9f5f7c36883d17971",
+    strip_prefix = "protobuf-23.4",
+    urls = ["https://github.com/protocolbuffers/protobuf/releases/download/v23.4/protobuf-23.4.tar.gz"],
 )
 
 load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
@@ -86,14 +113,27 @@ load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 protobuf_deps()
 
 http_archive(
-    name = "com_grail_bazel_toolchain",
-    canonical_id = "0.7.2",
-    sha256 = "f7aa8e59c9d3cafde6edb372d9bd25fb4ee7293ab20b916d867cd0baaa642529",
-    strip_prefix = "bazel-toolchain-0.7.2",
-    url = "https://github.com/grailbio/bazel-toolchain/archive/0.7.2.tar.gz",
+    name = "googleapis",
+    sha256 = "361e26593b881e70286a28065859c941e25b96f9c48ba91127293d0a881152d6",
+    strip_prefix = "googleapis-a3770599794a8d319286df96f03343b6cd0e7f4f",
+    urls = ["https://github.com/googleapis/googleapis/archive/a3770599794a8d319286df96f03343b6cd0e7f4f.zip"],
 )
 
-load("@com_grail_bazel_toolchain//toolchain:rules.bzl", "llvm_toolchain")
+load("@googleapis//:repository_rules.bzl", "switched_rules_by_language")
+
+switched_rules_by_language(
+    name = "com_google_googleapis_imports",
+)
+
+http_archive(
+    name = "toolchains_llvm",
+    canonical_id = "0.10.3",
+    sha256 = "b7cd301ef7b0ece28d20d3e778697a5e3b81828393150bed04838c0c52963a01",
+    strip_prefix = "toolchains_llvm-0.10.3",
+    url = "https://github.com/grailbio/bazel-toolchain/releases/download/0.10.3/toolchains_llvm-0.10.3.tar.gz",
+)
+
+load("@toolchains_llvm//toolchain:rules.bzl", "llvm_toolchain")
 
 llvm_toolchain(
     name = "llvm_toolchain",
@@ -129,9 +169,9 @@ http_archive(
 
 http_archive(
     name = "aspect_rules_js",
-    sha256 = "00e7b97b696af63812df0ca9e9dbd18579f3edd3ab9a56f227238b8405e4051c",
-    strip_prefix = "rules_js-1.23.0",
-    url = "https://github.com/aspect-build/rules_js/releases/download/v1.23.0/rules_js-v1.23.0.tar.gz",
+    sha256 = "63cf42b07aae34904447c74f5b41652c4933984cc325726673a5e4561d9789e7",
+    strip_prefix = "rules_js-1.39.1",
+    url = "https://github.com/aspect-build/rules_js/releases/download/v1.39.1/rules_js-v1.39.1.tar.gz",
 )
 
 load("@aspect_rules_js//js:repositories.bzl", "rules_js_dependencies")
