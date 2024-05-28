@@ -104,7 +104,7 @@ func main() {
 					autoScalingClient = autoscaling.NewFromConfig(cfg)
 					eksClient = eks.NewFromConfig(cfg)
 				}
-			case *bb_autoscaler.NodeGroupConfiguration_KubernetesDeployment:
+			case *bb_autoscaler.NodeGroupConfiguration_KubernetesDeployment, *bb_autoscaler.NodeGroupConfiguration_KubernetesStatefulSet:
 				if kubernetesClientset == nil {
 					config, err := rest.InClusterConfig()
 					if err != nil {
@@ -116,7 +116,7 @@ func main() {
 					}
 				}
 			default:
-				return status.Error(codes.InvalidArgument, "No ASG, EKS managed node group, or Kubernetes deployment name specified")
+				return status.Error(codes.InvalidArgument, "No ASG, EKS managed node group, Kubernetes deployment, or Kubernetes stateful set specified")
 			}
 		}
 
@@ -174,6 +174,9 @@ func main() {
 				case *bb_autoscaler.NodeGroupConfiguration_KubernetesDeployment:
 					minSize = kind.KubernetesDeployment.MinimumReplicas
 					maxSize = kind.KubernetesDeployment.MaximumReplicas
+				case *bb_autoscaler.NodeGroupConfiguration_KubernetesStatefulSet:
+					minSize = kind.KubernetesStatefulSet.MinimumReplicas
+					maxSize = kind.KubernetesStatefulSet.MaximumReplicas
 				default:
 					panic("Incomplete switch on node group kind")
 				}
@@ -250,6 +253,38 @@ func main() {
 								}); err != nil {
 							return util.StatusWrapf(err, "Failed to change number of replicas of Kubernetes deployment %#v in namespace %#v", name, namespace)
 						}
+					case *bb_autoscaler.NodeGroupConfiguration_KubernetesStatefulSet:
+						namespace := kind.KubernetesStatefulSet.Namespace
+						name := kind.KubernetesStatefulSet.Name
+						metaKind := "StatefulSet"
+						metaAPIVersion := "apps/v1"
+						if _, err := kubernetesClientset.
+							AppsV1().
+							StatefulSets(namespace).
+							Apply(
+								ctx,
+								&appsv1_apply.StatefulSetApplyConfiguration{
+									TypeMetaApplyConfiguration: metav1_apply.TypeMetaApplyConfiguration{
+										Kind:       &metaKind,
+										APIVersion: &metaAPIVersion,
+									},
+									ObjectMetaApplyConfiguration: &metav1_apply.ObjectMetaApplyConfiguration{
+										Name:      &name,
+										Namespace: &namespace,
+										Annotations: map[string]string{
+											"kubernetes.io/change-cause": "replicas updated by bb_autoscaler",
+										},
+									},
+									Spec: &appsv1_apply.StatefulSetSpecApplyConfiguration{
+										Replicas: &newDesiredCapacity,
+									},
+								},
+								metav1.ApplyOptions{
+									FieldManager: "bb_autoscaler",
+									Force:        true,
+								}); err != nil {
+							return util.StatusWrapf(err, "Failed to change number of replicas of Kubernetes stateful set %#v in namespace %#v", name, namespace)
+						}
 					default:
 						panic("Incomplete switch on node group kind")
 					}
@@ -260,4 +295,17 @@ func main() {
 		}
 		return nil
 	})
+}
+
+func createKubernetesClient() (*kubernetes.Clientset, error) {
+	config, err := rest.InClusterConfig()
+	if err != nil {
+		return nil, util.StatusWrap(err, "Failed to create Kubernetes client configuration")
+	}
+	kubernetesClientset, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		return nil, util.StatusWrap(err, "Failed to create Kubernetes client")
+	}
+
+	return kubernetesClientset, nil
 }

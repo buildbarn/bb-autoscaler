@@ -5,7 +5,8 @@ combination with [Buildbarn Remote Execution](https://github.com/buildbarn/bb-re
 to automatically adjust the size of Amazon EC2
 [Auto Scaling Groups (ASGs)](https://docs.aws.amazon.com/autoscaling/ec2/userguide/AutoScalingGroup.html),
 EKS [Managed Node Groups](https://docs.aws.amazon.com/eks/latest/userguide/managed-node-groups.html),
-or [Kubernetes deployments](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)
+or Kubernetes [deployments](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)/
+[stateful sets](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/)
 of Buildbarn workers based on load. Load metrics are obtained by
 querying Prometheus, which in its turn extracts metrics from
 `bb_scheduler`. It relies on Prometheus to normalize the load metrics

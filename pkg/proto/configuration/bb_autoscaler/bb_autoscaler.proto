@@ -59,7 +59,7 @@ message EKSManagedNodeGroupConfiguration {
   string node_group_name = 2;
 }
 
-message KubernetesDeploymentConfiguration {
+message KubernetesReplicaSetConfiguration {
   // Namespace containing the deployment whose replicas count should be
   // adjusted.
   string namespace = 1;
@@ -101,7 +101,10 @@ message NodeGroupConfiguration {
     EKSManagedNodeGroupConfiguration eks_managed_node_group = 5;
 
     // Kubernetes deployment whose replicas count should be adjusted.
-    KubernetesDeploymentConfiguration kubernetes_deployment = 7;
+    KubernetesReplicaSetConfiguration kubernetes_deployment = 7;
+
+    // Kubernetes stateful set whose replicas count should be adjusted.
+    KubernetesReplicaSetConfiguration kubernetes_stateful_set = 9;
   }
 
   // The number of workers that constitute to a single unit of capacity.
