@@ -6,7 +6,7 @@ go_library(
     importpath = "github.com/buildbarn/bb-autoscaler/pkg/autoscaler",
     visibility = ["//visibility:public"],
     deps = [
-        "@com_github_bazelbuild_remote_apis//build/bazel/remote/execution/v2:execution",
+        "@bazel_remote_apis//build/bazel/remote/execution/v2:remote_execution_go_proto",
         "@com_github_buildbarn_bb_storage//pkg/util",
         "@com_github_prometheus_common//model",
         "@org_golang_google_grpc//codes",
@@ -21,7 +21,7 @@ go_test(
     srcs = ["size_class_queue_key_test.go"],
     deps = [
         ":autoscaler",
-        "@com_github_bazelbuild_remote_apis//build/bazel/remote/execution/v2:execution",
+        "@bazel_remote_apis//build/bazel/remote/execution/v2:remote_execution_go_proto",
         "@com_github_buildbarn_bb_storage//pkg/testutil",
         "@com_github_prometheus_common//model",
         "@com_github_stretchr_testify//require",
