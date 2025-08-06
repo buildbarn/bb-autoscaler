@@ -1,37 +1,39 @@
 module(name = "com_github_buildbarn_bb_autoscaler")
 
+bazel_dep(name = "bazel_remote_apis", version = "0.0.0")
 bazel_dep(name = "com_github_buildbarn_bb_remote_execution")
 bazel_dep(name = "com_github_buildbarn_bb_storage")
 bazel_dep(name = "com_github_buildbarn_go_xdr")
-bazel_dep(name = "gazelle", version = "0.35.0")
-bazel_dep(name = "jsonnet_go", version = "0.20.0", repo_name = "google_jsonnet_go")
-bazel_dep(name = "protobuf", version = "23.1")
-bazel_dep(name = "rules_go", version = "0.46.0")
-bazel_dep(name = "toolchains_llvm", version = "1.0.0")
+bazel_dep(name = "gazelle", version = "0.45.0")
+bazel_dep(name = "jsonnet_go", version = "0.21.0")
+bazel_dep(name = "protobuf", version = "31.1")
+bazel_dep(name = "rules_go", version = "0.56.1")
+bazel_dep(name = "rules_jsonnet", version = "0.7.2")
+bazel_dep(name = "rules_proto", version = "7.1.0")
+bazel_dep(name = "toolchains_llvm", version = "1.4.0")
+
+git_override(
+    module_name = "bazel_remote_apis",
+    commit = "9ef19c6b5fbf77d6dd9d84d75fbb5a20a6b62ef1",
+    remote = "https://github.com/bazelbuild/remote-apis.git",
+)
 
 git_override(
     module_name = "com_github_buildbarn_bb_remote_execution",
-    commit = "f84a2c0f72119f6d3b157905a00163d0f167a73e",
+    commit = "58b88e8adfbd4cb5c32905383ef9c35ea1f9598e",
     remote = "https://github.com/buildbarn/bb-remote-execution.git",
 )
 
 git_override(
     module_name = "com_github_buildbarn_bb_storage",
-    commit = "914e53aad8cd16fc4c1ecd7f706149e8440ea24a",
+    commit = "985dacd564471beea22d17d59f9f8876047a7ff4",
     remote = "https://github.com/buildbarn/bb-storage.git",
 )
 
 git_override(
     module_name = "com_github_buildbarn_go_xdr",
-    commit = "9cb8426d3e09e301c2b12c993e54ef795a665a92",
+    commit = "236788cf9e8948a1e8875c7dd243e2be180cdfd7",
     remote = "https://github.com/buildbarn/go-xdr.git",
-)
-
-git_override(
-    module_name = "gazelle",
-    commit = "f5a5c5dc90b4d6a39f0f47d770eba27c6c1c1877",
-    patches = ["//:patches/gazelle/googleapis.diff"],
-    remote = "https://github.com/bazelbuild/bazel-gazelle.git",
 )
 
 git_override(
@@ -55,8 +57,6 @@ use_repo(
     "com_github_aws_aws_sdk_go_v2_service_sqs",
     "com_github_aws_smithy_go",
     "com_github_bazelbuild_buildtools",
-    "com_github_bazelbuild_remote_apis",
-    "com_github_golang_mock",
     "com_github_prometheus_client_golang",
     "com_github_prometheus_common",
     "com_github_stretchr_testify",
@@ -65,34 +65,13 @@ use_repo(
     "org_golang_google_grpc",
     "org_golang_google_protobuf",
     "org_golang_x_lint",
+    "org_uber_go_mock",
 )
 
 go_deps_dev = use_extension("@gazelle//:extensions.bzl", "go_deps", dev_dependency = True)
-go_deps_dev.gazelle_override(
-    build_file_generation = "on",
-    directives = [
-        "gazelle:resolve proto go build/bazel/semver/semver.proto //build/bazel/semver",
-        "gazelle:resolve proto go google/api/annotations.proto @org_golang_google_genproto_googleapis_api//annotations",
-        "gazelle:resolve proto go google/longrunning/operations.proto @com_google_cloud_go_longrunning//autogen/longrunningpb",
-        "gazelle:resolve proto go google/rpc/status.proto @org_golang_google_genproto_googleapis_rpc//status",
-        "gazelle:resolve proto google/api/annotations.proto @googleapis//google/api:annotations_proto",
-        "gazelle:resolve proto google/longrunning/operations.proto @googleapis//google/longrunning:operations_proto",
-        "gazelle:resolve proto google/rpc/status.proto @googleapis//google/rpc:status_proto",
-    ],
-    path = "github.com/bazelbuild/remote-apis",
-)
 go_deps_dev.module_override(
     patches = ["@com_github_buildbarn_bb_storage//:patches/com_github_grpc_ecosystem_go_grpc_prometheus/client-metrics-prevent-handled-twice.diff"],
     path = "github.com/grpc-ecosystem/go-grpc-prometheus",
-)
-
-http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-
-http_archive(
-    name = "io_bazel_rules_jsonnet",
-    sha256 = "c51ba0dba41d667fa5c64e56e252ba54be093e5ae764af6470dabca901f373eb",
-    strip_prefix = "rules_jsonnet-0.5.0",
-    urls = ["https://github.com/bazelbuild/rules_jsonnet/archive/0.5.0.tar.gz"],
 )
 
 llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm", dev_dependency = True)

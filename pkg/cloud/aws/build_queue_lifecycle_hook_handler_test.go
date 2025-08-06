@@ -7,12 +7,13 @@ import (
 	"github.com/buildbarn/bb-autoscaler/internal/mock"
 	as_aws "github.com/buildbarn/bb-autoscaler/pkg/cloud/aws"
 	"github.com/buildbarn/bb-remote-execution/pkg/proto/buildqueuestate"
-	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
+
+	"go.uber.org/mock/gomock"
 )
 
 func TestBuildQueueLifecycleHookHandler(t *testing.T) {
