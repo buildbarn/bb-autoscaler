@@ -4,14 +4,14 @@ package buildbarn.configuration.bb_autoscaler;
 
 import "build/bazel/remote/execution/v2/remote_execution.proto";
 import "pkg/proto/configuration/cloud/aws/aws.proto";
-import "pkg/proto/configuration/http/http.proto";
+import "pkg/proto/configuration/http/client/client.proto";
 
 option go_package = "github.com/buildbarn/bb-autoscaler/pkg/proto/configuration/bb_autoscaler";
 
 message ApplicationConfiguration {
   // Optional: Options of the HTTP client that is used to communicate
   // with the Prometheus server.
-  buildbarn.configuration.http.ClientConfiguration prometheus_http_client = 5;
+  buildbarn.configuration.http.client.Configuration prometheus_http_client = 5;
 
   // The URL of the Prometheus server from which to fetch metrics.
   //

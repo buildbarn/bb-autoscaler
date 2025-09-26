@@ -13,7 +13,7 @@ import (
 	"github.com/buildbarn/bb-autoscaler/pkg/autoscaler"
 	"github.com/buildbarn/bb-autoscaler/pkg/proto/configuration/bb_autoscaler"
 	"github.com/buildbarn/bb-storage/pkg/cloud/aws"
-	bb_http "github.com/buildbarn/bb-storage/pkg/http"
+	http_client "github.com/buildbarn/bb-storage/pkg/http/client"
 	"github.com/buildbarn/bb-storage/pkg/program"
 	"github.com/buildbarn/bb-storage/pkg/util"
 	"github.com/prometheus/client_golang/api"
@@ -57,7 +57,7 @@ func main() {
 
 		// Obtain desired number of workers from Prometheus.
 		log.Printf("[1/2] Fetching desired worker count from Prometheus by running query %#v", configuration.PrometheusQuery)
-		prometheusRoundTripper, err := bb_http.NewRoundTripperFromConfiguration(configuration.PrometheusHttpClient)
+		prometheusRoundTripper, err := http_client.NewRoundTripperFromConfiguration(configuration.PrometheusHttpClient)
 		if err != nil {
 			return util.StatusWrap(err, "Failed to create Prometheus HTTP client")
 		}

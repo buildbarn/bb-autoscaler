@@ -13,7 +13,7 @@ go_library(
         "@com_github_aws_aws_sdk_go_v2_service_eks//:eks",
         "@com_github_aws_aws_sdk_go_v2_service_eks//types",
         "@com_github_buildbarn_bb_storage//pkg/cloud/aws",
-        "@com_github_buildbarn_bb_storage//pkg/http",
+        "@com_github_buildbarn_bb_storage//pkg/http/client",
         "@com_github_buildbarn_bb_storage//pkg/program",
         "@com_github_buildbarn_bb_storage//pkg/util",
         "@com_github_prometheus_client_golang//api",
