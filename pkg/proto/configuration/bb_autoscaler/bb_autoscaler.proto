@@ -3,8 +3,8 @@ syntax = "proto3";
 package buildbarn.configuration.bb_autoscaler;
 
 import "build/bazel/remote/execution/v2/remote_execution.proto";
-import "pkg/proto/configuration/cloud/aws/aws.proto";
-import "pkg/proto/configuration/http/client/client.proto";
+import "github.com/buildbarn/bb-storage/pkg/proto/configuration/cloud/aws/aws.proto";
+import "github.com/buildbarn/bb-storage/pkg/proto/configuration/http/client/client.proto";
 
 option go_package = "github.com/buildbarn/bb-autoscaler/pkg/proto/configuration/bb_autoscaler";
 
