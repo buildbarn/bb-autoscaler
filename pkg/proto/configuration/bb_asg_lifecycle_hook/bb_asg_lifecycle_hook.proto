@@ -2,9 +2,9 @@ syntax = "proto3";
 
 package buildbarn.configuration.bb_asg_lifecycle_hook;
 
-import "pkg/proto/configuration/cloud/aws/aws.proto";
-import "pkg/proto/configuration/global/global.proto";
-import "pkg/proto/configuration/grpc/grpc.proto";
+import "github.com/buildbarn/bb-storage/pkg/proto/configuration/cloud/aws/aws.proto";
+import "github.com/buildbarn/bb-storage/pkg/proto/configuration/global/global.proto";
+import "github.com/buildbarn/bb-storage/pkg/proto/configuration/grpc/grpc.proto";
 
 option go_package = "github.com/buildbarn/bb-autoscaler/pkg/proto/configuration/bb_asg_lifecycle_hook";
 

@@ -5,6 +5,7 @@ load("@rules_proto//proto:defs.bzl", "proto_library")
 proto_library(
     name = "bb_asg_lifecycle_hook_proto",
     srcs = ["bb_asg_lifecycle_hook.proto"],
+    import_prefix = "github.com/buildbarn/bb-autoscaler",
     visibility = ["//visibility:public"],
     deps = [
         "@com_github_buildbarn_bb_storage//pkg/proto/configuration/cloud/aws:aws_proto",
